@@ -39,9 +39,7 @@ fi
 
 # Move everything from dist/ delete everything except dist & excluded
 rsync --delete-after --recursive \
-      --exclude=node_modules \
       --exclude=.git \
-      --exclude=.gitignore \
       dist/ .
 
 # Commit and push
