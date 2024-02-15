@@ -34,7 +34,7 @@ module.exports = {
             {
                 test: /\.ts/,
                 use: 'ts-loader',
-                exclude: /node_modules/,
+                exclude: /node_modules/
             },
             {
                 test: /\.js$/,
@@ -42,6 +42,10 @@ module.exports = {
                 use: {
                     loader: 'babel-loader'
                 }
+            },
+            {
+                test: /\.glsl$|\.frag$|\.vert$|\.txt$/i,
+                use: 'raw-loader'
             }
         ]
     },
