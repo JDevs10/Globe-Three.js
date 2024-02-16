@@ -4,6 +4,7 @@ import vertexShader from './shaders/vertex.glsl';
 import fragmentShader from './shaders/fragment.glsl';
 import atmosphereVertexShader from './shaders/atmosphereVertex.glsl';
 import atmosphereFragmentShader from './shaders/atmosphereFragment.glsl';
+const globeUrl = './assets/img/globe.jpeg';
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, innerWidth / innerHeight, 0.1, 1000);
@@ -15,7 +16,20 @@ renderer.setSize(innerWidth, innerHeight);
 renderer.setPixelRatio(window.devicePixelRatio);
 document.body.appendChild(renderer.domElement);
 
+const loadTexture = async (url: string): Promise<THREE.Texture> => {
+    let textureLoader = new THREE.TextureLoader();
+
+    console.log(url);
+
+    return new Promise(resolve => {
+        textureLoader.load(url, texture => {
+            resolve(texture)
+        })
+    })
+}
+
 // create earth sphere
+const globeMap = await loadTexture(globeUrl);
 const sphere = new THREE.Mesh(
     new THREE.SphereGeometry(5, 50, 50),
     new THREE.ShaderMaterial({
@@ -23,7 +37,8 @@ const sphere = new THREE.Mesh(
         fragmentShader,
         uniforms: {
             globeTexture: {
-                value: new THREE.TextureLoader().load('./assets/img/globe.jpeg')
+                // value: new THREE.TextureLoader().load('./assets/img/globe.jpeg')
+                value: globeMap
             }
         }
     })
