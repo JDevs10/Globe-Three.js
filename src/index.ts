@@ -1,4 +1,5 @@
-import gsap from 'gsap'
+import '../public/styles.css';
+import gsap from 'gsap';
 import * as THREE from 'three';
 import vertexShader from './shaders/vertex.glsl';
 import fragmentShader from './shaders/fragment.glsl';
@@ -19,9 +20,6 @@ document.body.appendChild(renderer.domElement);
 
 const loadTexture = async (url: string): Promise<THREE.Texture> => {
     let textureLoader = new THREE.TextureLoader();
-
-    console.log(url);
-
     return new Promise(resolve => {
         textureLoader.load(url, texture => {
             resolve(texture)
@@ -87,11 +85,19 @@ camera.position.z = 15;
 
 
 // create Boxs on earth
-function createBox(lat: number, lng: number) {
+function createBox(lat: number, lng: number, country: any) {
+    const scale = country.population / 1000000000;
+    const zScale = 0.8 * scale;
     const box = new THREE.Mesh(
-        new THREE.BoxGeometry(0.1, 0.1, 0.8),
+        new THREE.BoxGeometry(
+            Math.max(0.1, 0.2 * scale), 
+            Math.max(0.1, 0.2 * scale), 
+            Math.max(zScale, 0.4 * Math.random())
+        ),
         new THREE.MeshBasicMaterial({
-            color: 0x3bf7ff
+            color: 0x3bf7ff,
+            opacity: 0.4,
+            transparent: true
         })
     );
 
@@ -108,7 +114,7 @@ function createBox(lat: number, lng: number) {
     box.position.z = z;
 
     box.lookAt(0, 0, 0);
-    box.geometry.applyMatrix4(new THREE.Matrix4().makeTranslation(0, 0, -0.4))
+    box.geometry.applyMatrix4(new THREE.Matrix4().makeTranslation(0, 0, -zScale / 2))
 
     group.add(box);
 
@@ -120,24 +126,20 @@ function createBox(lat: number, lng: number) {
         ease: 'linear',
         delay: Math.random()
     });
-}
 
-console.log(Countries);
+    country.uuid = box.uuid;
+}
 
 for (let i = 0; i < Countries.length; i++) {
-    let latitude = Countries[i].latitude.value;
-    let longitude = Countries[i].longitude.value;
+    let latitude = Countries[i].latlng[0];
+    let longitude = Countries[i].latlng[1];
 
-    if (Countries[i].latitude.cardinalDirection === 'S') latitude = -Math.abs(latitude);
-    if (Countries[i].longitude.cardinalDirection === 'W') longitude = -Math.abs(longitude);
-
-    createBox(latitude, longitude);
+    createBox(latitude, longitude, Countries[i]);
 }
+
 
 // rotate sphere to math the points location
 sphere.rotation.y = -Math.PI / 2;
-
-
 
 
 const mouse: any = {
@@ -145,15 +147,67 @@ const mouse: any = {
     y: 0
 }
 
+const raycaster = new THREE.Raycaster();
+const popElm = document.getElementById('popElm'), 
+    populationEl = document.getElementById('populationEl'), 
+    populationValueEl = document.getElementById('populationValueEl');
+
+
 function animate(): void {
     requestAnimationFrame(animate)
     renderer.render(scene, camera);
-    // sphere.rotation.y += 0.002
-    gsap.to(group.rotation, {
-        x: -mouse.y * 0.9,
-        y: mouse.x * 1.9,
-        duration: 2
+    group.rotation.y += 0.002
+
+    // gsap.to(group.rotation, {
+    //     x: -mouse.y * 0.3,
+    //     y: mouse.x * 1.5,
+    //     duration: 2
+    // })
+
+    // update the picking ray with the camera and pointer position
+	raycaster.setFromCamera( mouse, camera );
+
+	// calculate objects intersecting the picking ray
+	const intersects = raycaster.intersectObjects(group.children.filter(mesh => {
+        return (mesh as THREE.Mesh).geometry.type === 'BoxGeometry';
+    }));
+
+    group.children.forEach((mesh) => {
+        if ((mesh as THREE.Mesh).material instanceof THREE.Material) {
+            const material = (mesh as THREE.Mesh).material as THREE.Material;
+            if ('opacity' in material) {
+                material.opacity = 0.4;
+            }
+        }
     })
+
+    gsap.set(popElm, {
+        display: 'none'
+    })
+
+	for ( let i = 0; i < intersects.length; i ++ ) {
+        const object = intersects[i].object as THREE.Mesh;
+        const material = object.material as THREE.Material;
+        const country = Countries.find((c: any) => c.uuid === object.uuid);
+
+        if (material instanceof THREE.Material && 'opacity' in material) {
+            material.opacity = 1;
+            gsap.set(popElm, {
+                display: 'block'
+            })
+        }
+
+        if (
+            country !== undefined && 
+            populationEl !== null && 
+            populationValueEl !== null
+        ) {
+            populationEl.innerHTML = country.name;
+            populationValueEl.innerHTML = new Intl.NumberFormat().format(country.population);
+        }
+	}
+
+	renderer.render(scene, camera);
 }
 
 animate();
@@ -161,4 +215,9 @@ animate();
 addEventListener('mousemove', (event: MouseEvent) => {
     mouse.x = (event.clientX / innerWidth) * 2 - 1
     mouse.y = -(event.clientY / innerHeight) * 2 + 1
+
+    gsap.set(popElm, {
+        x: event.clientX,
+        y: event.clientY
+    })
 })
