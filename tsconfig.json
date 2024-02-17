@@ -6,6 +6,7 @@
         "importHelpers": true,
         "esModuleInterop": true,
         "moduleResolution": "node",
+        "resolveJsonModule": true,
         "strictPropertyInitialization": false,
         "allowJs": true,
         "sourceMap": true,

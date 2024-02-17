@@ -1,0 +1,79 @@
+[
+    {
+        "name": "France",
+        "latitude": {
+            "value": 47.0000,
+            "cardinalDirection": "N"
+        },
+        "longitude": {
+            "value": 2.0000,
+            "cardinalDirection": "E"
+        }
+    },
+    {
+        "name": "Mexico",
+        "latitude": {
+            "value": 23.6345,
+            "cardinalDirection": "N"
+        },
+        "longitude": {
+            "value": 102.5528,
+            "cardinalDirection": "W"
+        }
+    },
+    {
+        "name": "Brazil",
+        "latitude": {
+            "value": 14.2350,
+            "cardinalDirection": "S"
+        },
+        "longitude": {
+            "value": 51.92535528,
+            "cardinalDirection": "W"
+        }
+    },
+    {
+        "name": "India",
+        "latitude": {
+            "value": 20.5937,
+            "cardinalDirection": "N"
+        },
+        "longitude": {
+            "value": 78.9629,
+            "cardinalDirection": "E"
+        }
+    },
+    {
+        "name": "China",
+        "latitude": {
+            "value": 35.8617,
+            "cardinalDirection": "N"
+        },
+        "longitude": {
+            "value": 104.1954,
+            "cardinalDirection": "E"
+        }
+    },
+    {
+        "name": "Pakistan",
+        "latitude": {
+            "value": 30.3753,
+            "cardinalDirection": "N"
+        },
+        "longitude": {
+            "value": 69.3451,
+            "cardinalDirection": "E"
+        }
+    },
+    {
+        "name": "United States",
+        "latitude": {
+            "value": 37.0902,
+            "cardinalDirection": "N"
+        },
+        "longitude": {
+            "value": 95.7129,
+            "cardinalDirection": "W"
+        }
+    }
+]

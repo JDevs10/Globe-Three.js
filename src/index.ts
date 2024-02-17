@@ -4,6 +4,7 @@ import vertexShader from './shaders/vertex.glsl';
 import fragmentShader from './shaders/fragment.glsl';
 import atmosphereVertexShader from './shaders/atmosphereVertex.glsl';
 import atmosphereFragmentShader from './shaders/atmosphereFragment.glsl';
+import Countries from './data/countries.json';
 const globeUrl = './assets/img/globe.jpeg';
 
 const scene = new THREE.Scene();
@@ -84,6 +85,61 @@ scene.add(stars);
 
 camera.position.z = 15;
 
+
+// create Boxs on earth
+function createBox(lat: number, lng: number) {
+    const box = new THREE.Mesh(
+        new THREE.BoxGeometry(0.1, 0.1, 0.8),
+        new THREE.MeshBasicMaterial({
+            color: 0x3bf7ff
+        })
+    );
+
+    const latitude: number = (lat / 180) * Math.PI;
+    const longitude: number = (lng / 180) * Math.PI;
+    const radius: number = 5; // radius of the earh
+
+    const x = radius * Math.cos(latitude) * Math.sin(longitude)
+    const y = radius * Math.sin(latitude)
+    const z = radius * Math.cos(latitude) * Math.cos(longitude)
+
+    box.position.x = x;
+    box.position.y = y;
+    box.position.z = z;
+
+    box.lookAt(0, 0, 0);
+    box.geometry.applyMatrix4(new THREE.Matrix4().makeTranslation(0, 0, -0.4))
+
+    group.add(box);
+
+    gsap.to(box.scale, {
+        z: 0,
+        duration: 2,
+        yoyo: true,
+        repeat: -1,
+        ease: 'linear',
+        delay: Math.random()
+    });
+}
+
+console.log(Countries);
+
+for (let i = 0; i < Countries.length; i++) {
+    let latitude = Countries[i].latitude.value;
+    let longitude = Countries[i].longitude.value;
+
+    if (Countries[i].latitude.cardinalDirection === 'S') latitude = -Math.abs(latitude);
+    if (Countries[i].longitude.cardinalDirection === 'W') longitude = -Math.abs(longitude);
+
+    createBox(latitude, longitude);
+}
+
+// rotate sphere to math the points location
+sphere.rotation.y = -Math.PI / 2;
+
+
+
+
 const mouse: any = {
     x: 0,
     y: 0
@@ -92,10 +148,10 @@ const mouse: any = {
 function animate(): void {
     requestAnimationFrame(animate)
     renderer.render(scene, camera);
-    sphere.rotation.y += 0.002
+    // sphere.rotation.y += 0.002
     gsap.to(group.rotation, {
-        x: -mouse.y * 0.3,
-        y: mouse.x * 0.5,
+        x: -mouse.y * 0.9,
+        y: mouse.x * 1.9,
         duration: 2
     })
 }
