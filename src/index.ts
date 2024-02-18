@@ -220,7 +220,6 @@ animate();
 // set delay, so dom can load and canvas can init
 setTimeout(() => {
     canvas.addEventListener('mousedown', (event: MouseEvent) => {
-        console.log('mousedown')
         mouse.down = true;
         mouse.xPrev = event.clientX;
         mouse.yPrev = event.clientY;
@@ -254,9 +253,54 @@ addEventListener('mousemove', (event: MouseEvent) => {
 })
 
 addEventListener('mouseup', (event: MouseEvent) => {
-    console.log('mouseup')
     mouse.down = false;
 })
+
+//#region For mobile listeners
+setTimeout(() => {
+    canvas.addEventListener('touchstart', (event: TouchEvent) => {
+        mouse.down = true;
+        mouse.xPrev = event.touches[0].clientX;
+        mouse.yPrev = event.touches[0].clientY;
+    })
+}, 0);
+
+setTimeout(() => {
+    addEventListener('touchmove', (event: TouchEvent) => {
+        const clientX = event.touches[0].clientX;
+        const clientY = event.touches[0].clientY;
+    
+        if (mouse.down) {
+            mouse.x = (clientX / innerWidth) * 2 - 1
+            mouse.y = -(clientY / innerHeight) * 2 + 1
+    
+            gsap.set(popElm, {
+                x: clientX,
+                y: clientY
+            })
+    
+            event.preventDefault();
+            const deltaX = clientX - mouse.xPrev;
+            const deltaY = clientY - mouse.yPrev;
+    
+            groupRotationOffset.y += deltaX * 0.005;
+            groupRotationOffset.x += deltaY * 0.005;
+    
+            gsap.to(group.rotation, {
+                y: groupRotationOffset.y,
+                x: groupRotationOffset.x,
+                duration: 2
+            });
+            mouse.xPrev = clientX
+            mouse.yPrev = clientY
+        }
+    })
+}, 0)
+
+addEventListener('touchend', (event: TouchEvent) => {
+    mouse.down = false;
+})
+//#endregion
 
 addEventListener('resize', (e) => {
     canvas.style.width = innerWidth + 'px';
