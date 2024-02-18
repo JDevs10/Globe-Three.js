@@ -270,7 +270,7 @@ addEventListener('wheel', (event: any) => {
 
     // Limit the zoom range if desired
     // For example, prevent the camera from getting too close or too far
-    const minZoom = 5;
+    const minZoom = 6;
     const maxZoom = 20;
     camera.position.z = Math.max(minZoom, Math.min(maxZoom, camera.position.z));
 
@@ -293,7 +293,7 @@ setTimeout(() => {
     addEventListener('touchmove', (event: TouchEvent) => {
         console.log(event.touches.length);
         if (event.touches.length === 2) {
-            const minZoom = 5;
+            const minZoom = 6;
             const maxZoom = 20;
             const touch1 = event.touches[0];
             const touch2 = event.touches[1];
