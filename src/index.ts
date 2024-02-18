@@ -150,6 +150,8 @@ const mouse: any = {
     down: false,
     xPrev: undefined,
     yPrev: undefined,
+    touchStartDistance: 0,
+    touchStartZoom: 0
 }
 
 const raycaster = new THREE.Raycaster();
@@ -256,17 +258,67 @@ addEventListener('mouseup', (event: MouseEvent) => {
     mouse.down = false;
 })
 
+addEventListener('wheel', (event: any) => {
+    console.log(event);
+    // Adjust the camera position based on the direction and speed of the scroll
+    const deltaY = event.deltaY;
+
+    // Modify this value according to your preference for zoom speed
+    const zoomSpeed = 0.01;
+
+    camera.position.z += deltaY * zoomSpeed;
+
+    // Limit the zoom range if desired
+    // For example, prevent the camera from getting too close or too far
+    const minZoom = 5;
+    const maxZoom = 20;
+    camera.position.z = Math.max(minZoom, Math.min(maxZoom, camera.position.z));
+
+    // Update the camera
+    camera.updateProjectionMatrix();
+})
+
 //#region For mobile listeners
 setTimeout(() => {
     canvas.addEventListener('touchstart', (event: TouchEvent) => {
         mouse.down = true;
         mouse.xPrev = event.touches[0].clientX;
         mouse.yPrev = event.touches[0].clientY;
+        mouse.touchStartDistance = 0;
+        mouse.touchStartZoom = camera.position.z;
     })
 }, 0);
 
 setTimeout(() => {
     addEventListener('touchmove', (event: TouchEvent) => {
+        console.log(event.touches.length);
+        if (event.touches.length === 2) {
+            const minZoom = 5;
+            const maxZoom = 20;
+            const touch1 = event.touches[0];
+            const touch2 = event.touches[1];
+    
+            event.preventDefault();
+            const currentDistance = Math.hypot(
+                touch2.clientX - touch1.clientX,
+                touch2.clientY - touch1.clientY
+            );
+    
+            if (mouse.touchStartDistance === 0) {
+                mouse.touchStartDistance = currentDistance;
+                mouse.touchStartZoom = camera.position.z;
+            } else {
+                const zoomDelta = (currentDistance - mouse.touchStartDistance) * 0.04;
+    
+                // Adjust the zoom speed according to your preference
+                const zoomSpeed = 0.5;
+    
+                camera.position.z = Math.max(minZoom, Math.min(maxZoom, mouse.touchStartZoom - zoomDelta * zoomSpeed));
+                camera.updateProjectionMatrix();
+            }
+            return;
+        }
+
         const clientX = event.touches[0].clientX;
         const clientY = event.touches[0].clientY;
     
@@ -294,7 +346,7 @@ setTimeout(() => {
             mouse.xPrev = clientX
             mouse.yPrev = clientY
         }
-    })
+    }, {passive: false})
 }, 0)
 
 addEventListener('touchend', (event: TouchEvent) => {
