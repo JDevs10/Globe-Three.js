@@ -17,6 +17,9 @@ module.exports = {
             minify: true
         }),
     ],
+    resolve: {
+        extensions: [".ts", ".js"],
+    },
     module: {
         rules: [
             // HTML
