@@ -49,3 +49,6 @@ git push
 
 # Return to main branch
 git checkout main
+
+# reinstall npm packages
+npm i
