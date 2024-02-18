@@ -1,6 +1,6 @@
 {
   "name": "globe-threejs",
-  "version": "0.1.0",
+  "version": "0.7.1",
   "description": "Learning of to make an interact globe in Three.js",
   "main": "index.ts",
   "scripts": {
