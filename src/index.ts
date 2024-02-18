@@ -9,13 +9,19 @@ import Countries from './data/countries.json';
 import { loadTexture } from './utils';
 const globeUrl = './assets/img/globe.jpeg';
 
+const canvas: HTMLElement|any = document.querySelector('#gameCanvas');
+canvas.style.width = innerWidth + 'px';
+canvas.style.height = (innerHeight - 4) + 'px';
+
+
 const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(75, innerWidth / innerHeight, 0.1, 1000);
+let camera = new THREE.PerspectiveCamera(75, canvas.offsetWidth / canvas.offsetHeight, 0.1, 1000);
 
 const renderer = new THREE.WebGL1Renderer({
-    antialias: true
+    antialias: true,
+    canvas: canvas
 });
-renderer.setSize(innerWidth, innerHeight);
+renderer.setSize(canvas.offsetWidth, canvas.offsetHeight);
 renderer.setPixelRatio(window.devicePixelRatio);
 document.body.appendChild(renderer.domElement);
 
@@ -132,10 +138,18 @@ for (let i = 0; i < Countries.length; i++) {
 // rotate sphere to math the points location
 sphere.rotation.y = -Math.PI / 2;
 
+// new user property
+let groupRotationOffset = {
+    y: 0,
+    x: 0
+}
 
 const mouse: any = {
     x: 0,
-    y: 0
+    y: 0,
+    down: false,
+    xPrev: undefined,
+    yPrev: undefined,
 }
 
 const raycaster = new THREE.Raycaster();
@@ -147,7 +161,7 @@ const popElm = document.getElementById('popElm'),
 function animate(): void {
     requestAnimationFrame(animate)
     renderer.render(scene, camera);
-    group.rotation.y += 0.002
+    // group.rotation.y += 0.002
 
     // gsap.to(group.rotation, {
     //     x: -mouse.y * 0.3,
@@ -203,6 +217,16 @@ function animate(): void {
 
 animate();
 
+// set delay, so dom can load and canvas can init
+setTimeout(() => {
+    canvas.addEventListener('mousedown', (event: MouseEvent) => {
+        console.log('mousedown')
+        mouse.down = true;
+        mouse.xPrev = event.clientX;
+        mouse.yPrev = event.clientY;
+    })
+}, 0);
+
 addEventListener('mousemove', (event: MouseEvent) => {
     mouse.x = (event.clientX / innerWidth) * 2 - 1
     mouse.y = -(event.clientY / innerHeight) * 2 + 1
@@ -211,4 +235,35 @@ addEventListener('mousemove', (event: MouseEvent) => {
         x: event.clientX,
         y: event.clientY
     })
+
+    if (mouse.down) {
+        const deltaX = event.clientX - mouse.xPrev;
+        const deltaY = event.clientY - mouse.yPrev;
+
+        groupRotationOffset.y += deltaX * 0.005;
+        groupRotationOffset.x += deltaY * 0.005;
+
+        gsap.to(group.rotation, {
+            y: groupRotationOffset.y,
+            x: groupRotationOffset.x,
+            duration: 2
+        });
+        mouse.xPrev = event.clientX
+        mouse.yPrev = event.clientY
+    }
+})
+
+addEventListener('mouseup', (event: MouseEvent) => {
+    console.log('mouseup')
+    mouse.down = false;
+})
+
+addEventListener('resize', (e) => {
+    canvas.style.width = innerWidth + 'px';
+    canvas.style.height = (innerHeight - 4) + 'px';
+
+    renderer.setSize(canvas.offsetWidth, canvas.offsetHeight)
+    camera = new THREE.PerspectiveCamera(75, canvas.offsetWidth / canvas.offsetHeight, 0.1, 1000)
+
+    camera.position.z = 15
 })
